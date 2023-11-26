@@ -31,15 +31,21 @@ ylabel('Norm of Orthogonality Constraint Violation')
 
 %% Functions
 
+function theta = DCM2EA313(C) 
+
+
+end 
+
 function dx = DCMkinematics(t, C) 
     Cm = reshape(C,[3,3])' ;
    
     Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ;
-    wSkew = [ 0   -w(3) w(2) ;
+    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
+    wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
               w(3) 0   -w(1) ;
              -w(2) w(1) 0    ] ;
     
+    % Cbn dot 
     Cdotm = -wSkew*Cm ;
     Cdot = reshape(Cdotm',[1,9]);
 

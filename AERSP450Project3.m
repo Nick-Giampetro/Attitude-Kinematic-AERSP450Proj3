@@ -27,19 +27,54 @@ xlabel('Time (sec)')
 ylabel('Norm of Orthogonality Constraint Violation')
 
 
+%% Part D
+theta = zeros(length(Cbn),3) ;
+for i = 1:length(Cbn)
+    theta(i,:) = DCM2EA313(Cbn(i,:)) ;
+end
+
+f = figure ;
+subplot(3,1,1)
+plot(t,theta(:,1),'r')
+title('3-1-3 Euler Angle 1 vs Time')
+xlabel('Time (sec)')
+ylabel('Euler Angle (degrees)')
+subplot(3,1,2)
+plot(t,theta(:,2),'g')
+title('3-1-3 Euler Angle 2 vs Time')
+xlabel('Time (sec)')
+ylabel('Euler Angle (degrees)')
+subplot(3,1,3)
+plot(t,theta(:,3),'b')
+title('3-1-3 Euler Angle 3 vs Time')
+xlabel('Time (sec)')
+ylabel('Euler Angle (degrees)')
+
+
+
 
 
 %% Functions
+
+function theta = DCM2EA313(C) 
+    Cm = reshape(C,[3,3])' 
+
+    theta(2) = acosd(Cm(3,3)) ;
+    theta(1) = asind(Cm(3,1)/sind(theta(2))) ;
+    theta(3) = acosd(Cm(2,3)/sind(theta(2))) ;
+    
+end 
 
 function dx = DCMkinematics(t, C) 
     Cm = reshape(C,[3,3])' ;
    
     Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ;
-    wSkew = [ 0   -w(3) w(2) ;
+    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
+    wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
               w(3) 0   -w(1) ;
              -w(2) w(1) 0    ] ;
     
+    % Cbn dot 
     Cdotm = -wSkew*Cm ;
     Cdot = reshape(Cdotm',[1,9]);
 
