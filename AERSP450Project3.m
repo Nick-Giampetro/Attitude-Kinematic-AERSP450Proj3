@@ -107,6 +107,7 @@ ylabel('Quaternion 3')
 
 %% Part G
 beta2 = zeros(length(t),4) ;
+quatErr = zeros(1,length(t)) ;
 beta2(1,:) = [1 0 0 0] ;
 
 for i = 2:length(t)
@@ -121,7 +122,7 @@ for i = 2:length(t)
 
     beta2(i,:) = phi * beta2(i-1,:)' ;
 
-    %quatErr(i) =   -[1 0 0 0]
+    quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
 end
 
 
