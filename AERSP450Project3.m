@@ -27,10 +27,21 @@ xlabel('Time (sec)')
 ylabel('Norm of Orthogonality Constraint Violation')
 
 %% Part B
-
-
+[CbnDiscrete1,err1] = discreteDCM(t,Cbn0,dt,Cbn) ;
+f = figure ;
+subplot(1,1,1)
+plot(t,err1,'r')
+hold on
 
 %% Part C
+dtC = 1 ;
+tC = 1:dtC:totalT ;
+[CbnDiscrete2,err2] = discreteDCM(tC,Cbn0,dtC,Cbn) ;
+plot(tC,err2,'b')
+title('Norm of Error vs Time')
+xlabel('Time (sec)')
+ylabel('Norm of Error')
+legend('dt = 0.01','dt = 1')
 
 %% Part D
 theta = zeros(length(Cbn),3) ;
@@ -88,19 +99,26 @@ ylabel('Quaternion 4')
 
 %% Functions
 
-function [C] = discreteDCM(t,C0,dt)
-    Cm = reshape(C0,[3,3])' ;
-
-    Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
-    wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
-              w(3) 0   -w(1) ;
-             -w(2) w(1) 0    ] ;
-    
-    phi = expm(-wSkew*dt) ;
-    
-
-
+function [C2,err] = discreteDCM(t,C0,dt,C1)  
+    C2 = zeros(length(t),9) ;
+    err = zeros(length(t),1) ;
+    err(1) = 1 ;
+    C2(1,:) = reshape(C0',[1,9]) ;
+   
+    for i = 2:length(t)
+        CmPrev = reshape(C2(i-1,:),[3,3])' ;        
+        Omega = 20 ; % degree per second
+        w = [Omega*sind(0.01*t(i-1)) 0.01 Omega*cosd(0.02*t(i-1))] ; % omega-b/n vector
+        wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
+                  w(3) 0   -w(1) ;
+                 -w(2) w(1) 0    ] ;
+        
+        phi = expm(-wSkew*dt) ;
+        CmNew = phi*CmPrev ;
+        C1m = reshape(C1(i,:),[3,3])' ; 
+        err(i) = norm(C1m*CmNew') ;
+        C2(i,:) = reshape(CmNew',[1,9]) ;
+    end
 end
 
 function theta = DCM2EA313(C) 
