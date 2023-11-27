@@ -109,7 +109,7 @@ function [C2,err] = discreteDCM(t,C0,dt,C1)
         CmPrev = reshape(C2(i-1,:),[3,3])' ;        
         Omega = 20 ; % degree per second
         w = [Omega*sind(0.01*t(i-1)) 0.01 Omega*cosd(0.02*t(i-1))] ; % omega-b/n vector
-        wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
+        wSkew = [ 0   -w(3) w(2) ;  %skew of omega-b/n
                   w(3) 0   -w(1) ;
                  -w(2) w(1) 0    ] ;
         
@@ -143,7 +143,7 @@ function dx = DCMkinematics(t, C)
    
     Omega = 20 ; % degree per second
     w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
-    wSkew = [ 0   -w(3) w(2) ;  %skew of omeg-b/n
+    wSkew = [ 0   -w(3) w(2) ;  %skew of omega-b/n
               w(3) 0   -w(1) ;
              -w(2) w(1) 0    ] ;
     
