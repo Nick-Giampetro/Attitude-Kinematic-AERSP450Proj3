@@ -37,9 +37,8 @@ hold on
 %% Part C
 dtC = 1 ;
 tC = 0:dtC:totalT ;
-CbnC = zeros(length(tC),9) ;
-for i = 1:length(tC)
-    CbnC(i,:) = Cbn((t==tC(i)),:) ;
+for i = length(tC)
+    CbnC = Cbn(find(t==tC(i)))
 end
 
 [CbnDiscrete2,err2] = discreteDCM(tC,Cbn0,dtC,CbnC) ;
