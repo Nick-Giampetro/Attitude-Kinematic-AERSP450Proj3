@@ -57,10 +57,6 @@ for i = 1:length(Cbn)
     theta1(i,:) = DCM2EA313(Cbn(i,:)) ;
 end
 
-for i = 1:length(Cbn)
-    
-end
-
 f = figure ;
 subplot(3,1,1)
 plot(t,theta1(:,1),'r')
@@ -104,20 +100,6 @@ for i = 1:length(Cbn)
     beta1(i,:) = DCM2quat(Cbn(i,:)) ;
 end
 
-f = figure ;
-subplot(2,2,1)
-plot(t,beta1(:,1),'b')
-hold on
-subplot(2,2,2)
-plot(t,beta1(:,2),'b')
-hold on
-subplot(2,2,3)
-plot(t,beta1(:,3),'b')
-hold on
-subplot(2,2,4)
-plot(t,beta1(:,4),'b')
-hold on
-
 %% Part G
 beta2 = zeros(length(t),4) ;
 quatErr = zeros(1,length(t)) ;
@@ -136,8 +118,26 @@ for i = 2:length(t)
     beta2(i,:) = phi * beta2(i-1,:)' ;
 
     quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
+
+    if quatErr(i) >= 1                              % jank way of making the DCM results from Part F continuous
+        beta1(i,:) = beta1(i,:) * -1 ;
+        quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
+    end    
 end
 
+f = figure ;
+subplot(2,2,1)
+plot(t,beta1(:,1),'b')
+hold on
+subplot(2,2,2)
+plot(t,beta1(:,2),'b')
+hold on
+subplot(2,2,3)
+plot(t,beta1(:,3),'b')
+hold on
+subplot(2,2,4)
+plot(t,beta1(:,4),'b')
+hold on
 subplot(2,2,1)
 plot(t,beta2(:,1),'r')
 title('Beta 0 vs Time')
@@ -166,6 +166,16 @@ xlabel('Time (sec)')
 ylabel('Quaternion 3')
 legend('DCM2quat','Descretized')
 hold off
+
+f = figure ;
+subplot (1,1,1)
+plot(t,quatErr)
+title('Norm of Error vs Time')
+xlabel('Time (sec)')
+ylabel('Norm of Error')
+legend('dt = 0.01')
+
+
 
 %% Functions
 
