@@ -49,32 +49,54 @@ title('Norm of Error vs Time')
 xlabel('Time (sec)')
 ylabel('Norm of Error')
 legend('dt = 0.01','dt = 1')
+hold off
 
 %% Part D
-theta = zeros(length(Cbn),3) ;
+theta1 = zeros(length(Cbn),3) ;
 for i = 1:length(Cbn)
-    theta(i,:) = DCM2EA313(Cbn(i,:)) ;
+    theta1(i,:) = DCM2EA313(Cbn(i,:)) ;
+end
+
+for i = 1:length(Cbn)
+    
 end
 
 f = figure ;
 subplot(3,1,1)
-plot(t,theta(:,1),'r')
+plot(t,theta1(:,1),'r')
+hold on
+subplot(3,1,2)
+plot(t,theta1(:,2),'r')
+hold on
+subplot(3,1,3)
+plot(t,theta1(:,3),'r')
+hold on
+
+%% Part E
+init = DCM2EA313(reshape(Cbn0',[1,9])) ;
+options = odeset('reltol',1e-12,'abstol',1e-12) ;
+[t, theta2] = ode45( @(t, theta2) EAkinematics(t, theta2) , t , init, options) ;    % this method does not work because the inital condition is bascially at gimble lock since theta2 = 0
+subplot(3,1,1)
+plot(t,theta2(:,1),'b')
 title('3-1-3 Euler Angle 1 vs Time')
 xlabel('Time (sec)')
 ylabel('Euler Angle (degrees)')
+legend('DCM2EA313','ODE45')
+hold off
 subplot(3,1,2)
-plot(t,theta(:,2),'g')
+plot(t,theta2(:,2),'b')
 title('3-1-3 Euler Angle 2 vs Time')
 xlabel('Time (sec)')
 ylabel('Euler Angle (degrees)')
+legend('DCM2EA313','ODE45')
+hold off
 subplot(3,1,3)
-plot(t,theta(:,3),'b')
+plot(t,theta2(:,3),'b')
 title('3-1-3 Euler Angle 3 vs Time')
 xlabel('Time (sec)')
 ylabel('Euler Angle (degrees)')
-
-%% Part E
-
+legend('DCM2EA313','ODE45')
+hold off
 
 %% Part F
 beta1 = zeros(length(Cbn),4) ;
@@ -83,27 +105,18 @@ for i = 1:length(Cbn)
 end
 
 f = figure ;
-subplot(4,1,1)
-plot(t,beta1(:,1),'m')
-title('Beta 0 vs Time')
-xlabel('Time (sec)')
-ylabel('Quaternion 4')
-subplot(4,1,2)
-plot(t,beta1(:,2),'r')
-title('Beta 1 vs Time')
-xlabel('Time (sec)')
-ylabel('Quaternion 1')
-subplot(4,1,3)
-plot(t,beta1(:,3),'g')
-title('Beta 2 vs Time')
-xlabel('Time (sec)')
-ylabel('Quaternion 2')
-subplot(4,1,4)
+subplot(2,2,1)
+plot(t,beta1(:,1),'b')
+hold on
+subplot(2,2,2)
+plot(t,beta1(:,2),'b')
+hold on
+subplot(2,2,3)
+plot(t,beta1(:,3),'b')
+hold on
+subplot(2,2,4)
 plot(t,beta1(:,4),'b')
-title('Beta 3 vs Time')
-xlabel('Time (sec)')
-ylabel('Quaternion 3')
-
+hold on
 
 %% Part G
 beta2 = zeros(length(t),4) ;
@@ -125,6 +138,34 @@ for i = 2:length(t)
     quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
 end
 
+subplot(2,2,1)
+plot(t,beta2(:,1),'r')
+title('Beta 0 vs Time')
+xlabel('Time (sec)')
+ylabel('Quaternion 4')
+legend('DCM2quat','Descretized')
+hold off
+subplot(2,2,2)
+plot(t,beta2(:,2),'r')
+title('Beta 1 vs Time')
+xlabel('Time (sec)')
+ylabel('Quaternion 1')
+legend('DCM2quat','Descretized')
+hold off
+subplot(2,2,3)
+plot(t,beta2(:,3),'r')
+title('Beta 2 vs Time')
+xlabel('Time (sec)')
+ylabel('Quaternion 2')
+legend('DCM2quat','Descretized')
+hold off
+subplot(2,2,4)
+plot(t,beta2(:,4),'r')
+title('Beta 3 vs Time')
+xlabel('Time (sec)')
+ylabel('Quaternion 3')
+legend('DCM2quat','Descretized')
+hold off
 
 %% Functions
 
@@ -161,10 +202,11 @@ end
 function beta = DCM2quat(C) 
     Cm = reshape(C,[3,3])' ;
 
-    beta(1) = sqrt((1 + Cm(1,1) + Cm(2,2) + Cm(3,3))) / 2 ;
-    beta(2) = (Cm(2,3) - Cm(3,2)) / (4*beta(1)) ;
-    beta(3) = (Cm(3,1) - Cm(1,3)) / (4*beta(1)) ;
+    beta(1) = sqrt(Cm(1,1) + Cm(2,2) + Cm(3,3) + 1) / 2 ;
+    beta(2) = (Cm(2,3) - Cm(3,2)) / (4*beta(1)) ; 
+    beta(3) = (Cm(3,1) - Cm(1,3)) / (4*beta(1)) ; 
     beta(4) = (Cm(1,2) - Cm(2,1)) / (4*beta(1)) ;
+
 end 
 
 function dx = DCMkinematics(t, C) 
@@ -183,7 +225,16 @@ function dx = DCMkinematics(t, C)
     dx = Cdot' ;
 end
 
-function dx = EAkinematics(t)
+function dx = EAkinematics(t, ang)
+    theta1 = ang(1) ;
+    theta2 = ang(2) ;
+    theta3 = ang(3) ;
+
+    Omega = 20 ; % degree per second
+    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
     
-    dx = 0 ;
+    B = 1/sind(theta2) * [ sind(theta3) cosd(theta3) 0 ; sind(theta2)*cosd(theta3) -sind(theta2)*sind(theta3) 0 ; -cosd(theta2)*sind(theta3) -cosd(theta2)*cosd(theta3) sind(theta2) ] ;
+    thetaDot = B * w' ;
+
+    dx = thetaDot ;
 end
