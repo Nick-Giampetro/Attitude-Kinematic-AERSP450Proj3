@@ -102,8 +102,10 @@ end
 
 %% Part G
 beta2 = zeros(length(t),4) ;
-quatErr = zeros(1,length(t)) ;
+quatErr = zeros(length(t),1) ;
 beta2(1,:) = [1 0 0 0] ;
+
+qMult([0.9389   -0.0036   -0.0100   -0.3442],[0.9389   0.0036   0.0100   0.3441]) - [1 0 0 0]'
 
 for i = 2:length(t)
     Omega = 20 ;
@@ -117,11 +119,12 @@ for i = 2:length(t)
 
     beta2(i,:) = phi * beta2(i-1,:)' ;
 
-    quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
+    beta2inv = [beta2(i,1) -beta2(i,2) -beta2(i,3) -beta2(i,4)] ;
+    quatErr(i) = norm(qMult(beta1(i,:),beta2inv) - [1 0 0 0]') ;
 
-    if quatErr(i) >= 1                              % jank way of making the DCM results from Part F continuous
+    if quatErr(i) > 1                             % jank way of making the DCM results from Part F continuous
         beta1(i,:) = beta1(i,:) * -1 ;
-        quatErr(i) = norm(beta1(i,:)-beta2(i,:)) ;
+        quatErr(i) = norm(qMult(beta1(i,:),beta2inv) - [1 0 0 0]') ;
     end    
 end
 
@@ -218,6 +221,13 @@ function beta = DCM2quat(C)
     beta(4) = (Cm(1,2) - Cm(2,1)) / (4*beta(1)) ;
 
 end 
+
+function res = qMult(a,b)
+    res = [a(1)*b(1) - a(2)*b(2) - a(3)*b(3) - a(4)*b(4) ;
+           a(1)*b(2) + a(2)*b(1) + a(3)*b(4) - a(4)*b(3) ;
+           a(1)*b(3) - a(2)*b(4) + a(3)*b(1) + a(4)*b(2) ;
+           a(1)*b(4) + a(2)*b(3) - a(3)*b(2) + a(4)*b(1) ] ;
+end
 
 function dx = DCMkinematics(t, C) 
     Cm = reshape(C,[3,3])' ;
