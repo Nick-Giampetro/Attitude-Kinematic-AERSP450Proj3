@@ -69,7 +69,7 @@ plot(t,theta1(:,3),'r')
 hold on
 
 %% Part E
-init = theta1(2,:);
+init = DCM2EA313(Cbn(1,:)) ;
 options = odeset('reltol',1e-12,'abstol',1e-12) ;
 [t, theta2] = ode45( @(t, theta2) EAkinematics(t, theta2) , t , init, options) ;    % this method does not work because the inital condition is bascially at gimble lock since theta2 = 0
 subplot(3,1,1)
@@ -96,18 +96,18 @@ hold off
 
 %% Part F
 beta1 = zeros(length(Cbn),4) ;
-quatConst = zeros(length(Cbn),1) ;
+quatConst(i) = zeros(length(Cbn),1) ;
 for i = 1:length(Cbn)
     beta1(i,:) = DCM2quat(Cbn(i,:)) ;
-    quatConst(i) = beta1(i,1)^2 + beta1(i,2)^2 + beta1(i,3)^2 + beta1(i,4)^2 ;
+    quatConst(i) = beta(i,1)^2 + beta(i,2)^2 + beta(i,3)^2 + beta(i,4)^2 ;
 end
 
 f = figure ;
 subplot (1,1,1)
-plot(t,quatConst)
-title('Quaternion Constraint vs Time')
+plot(t,quatErr)
+title('Norm of Error vs Time')
 xlabel('Time (sec)')
-ylabel('Quaternion Constraint')
+ylabel
 legend('dt = 0.01')
 
 %% Part G
@@ -153,7 +153,7 @@ subplot(2,2,1)
 plot(t,beta2(:,1),'r')
 title('Beta 0 vs Time')
 xlabel('Time (sec)')
-ylabel('Quaternion 0')
+ylabel('Quaternion 4')
 legend('DCM2quat','Descretized')
 hold off
 subplot(2,2,2)
@@ -259,10 +259,10 @@ function dx = EAkinematics(t, ang)
     theta3 = ang(3) ;
 
     Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)]' ; % omega-b/n vector
+    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
     
-    B = 1/sind(theta2) * [sind(theta3) cosd(theta3) 0 ; sind(theta2)*cosd(theta3) -sind(theta2)*sind(theta3) 0 ; -cosd(theta2)*sind(theta3) -cosd(theta2)*cosd(theta3) sind(theta2) ] ;
-    thetaDot = B * w ;
+    B = 1/sind(theta2) * [ sind(theta3) cosd(theta3) 0 ; sind(theta2)*cosd(theta3) -sind(theta2)*sind(theta3) 0 ; -cosd(theta2)*sind(theta3) -cosd(theta2)*cosd(theta3) sind(theta2) ] ;
+    thetaDot = B * w' ;
 
     dx = thetaDot ;
 end
