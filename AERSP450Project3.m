@@ -11,7 +11,7 @@ dt = 0.01 ; % delta T = 0.01
 init = reshape(Cbn0',[1,9]) ;
 t = 0:dt:totalT ;
 options = odeset('reltol',1e-12,'abstol',1e-12) ;
-[t, Cbn] = ode45( @(t,C) DCMkinematics(t,C) , t , init, options) ;
+[t, Cbn] = ode45( @(t,C) DCMkinematics(t,C) , t , init) ;
 
 orthCheck = zeros(1,length(Cbn)) ;
 for i=1:length(Cbn) 
@@ -69,28 +69,29 @@ plot(t,theta1(:,3),'r')
 hold on
 
 %% Part E
-init = theta1(2,:);
-options = odeset('reltol',1e-12,'abstol',1e-12) ;
-[t, theta2] = ode45( @(t, theta2) EAkinematics(t, theta2) , t , init, options) ;    % this method does not work because the inital condition is bascially at gimble lock since theta2 = 0
+init = [pi/2,10^-10,-pi/2] ;
+tEA = 0:dt:totalT ;
+[tEA, theta2] = ode45( @(tEA, theta2) EAkinematics(tEA, theta2) , tEA , init, options) ;    % this method does not work because the inital condition is bascially at gimble lock since theta2 = 0
+
 subplot(3,1,1)
-plot(t,theta2(:,1),'b')
+plot(tEA,theta2(:,1),'b')
 title('3-1-3 Euler Angle 1 vs Time')
 xlabel('Time (sec)')
-ylabel('Euler Angle (degrees)')
+ylabel('Euler Angle (radians)')
 legend('DCM2EA313','ODE45')
 hold off
 subplot(3,1,2)
-plot(t,theta2(:,2),'b')
+plot(tEA,theta2(:,2),'b')
 title('3-1-3 Euler Angle 2 vs Time')
 xlabel('Time (sec)')
-ylabel('Euler Angle (degrees)')
+ylabel('Euler Angle (radians)')
 legend('DCM2EA313','ODE45')
 hold off
 subplot(3,1,3)
-plot(t,theta2(:,3),'b')
+plot(tEA,theta2(:,3),'b')
 title('3-1-3 Euler Angle 3 vs Time')
 xlabel('Time (sec)')
-ylabel('Euler Angle (degrees)')
+ylabel('Euler Angle (radians)')
 legend('DCM2EA313','ODE45')
 hold off
 
@@ -117,7 +118,8 @@ beta2(1,:) = [1 0 0 0] ;
 
 for i = 2:length(t)
     Omega = 20 ;
-    w = [Omega*sind(0.01*t(i-1)) 0.01 Omega*cosd(0.02*t(i-1))] ; % omega-b/n vector
+    Omega = Omega * pi/180 ;
+    w = [Omega*sin(0.01*t(i-1)) 0.01 Omega*cos(0.02*t(i-1))] ; % omega-b/n vector
     BwSkew = [0    -w(1) -w(2) -w(3) ;
               w(1)  0     w(3) -w(2) ;
               w(2) -w(3)  0     w(1) ;
@@ -197,9 +199,10 @@ function [C2,err] = discreteDCM(t,C0,dt,C1)
     C2(1,:) = reshape(C0',[1,9]) ;
    
     for i = 2:length(t)
-        CmPrev = reshape(C2(i-1,:),[3,3])' ;        
-        Omega = 20 ; % degree per second
-        w = [Omega*sind(0.01*t(i-1)) 0.01 Omega*cosd(0.02*t(i-1))] ; % omega-b/n vector
+        CmPrev = reshape(C2(i-1,:),[3,3])' ;  
+        Omega = 20 ; % degrees per second 
+        Omega = Omega*pi/180 ;
+        w = [Omega*sin(0.01*t(i-1)) 0.01 Omega*cos(0.02*t(i-1))] ; % omega-b/n vector
         wSkew = [ 0   -w(3) w(2) ;  %skew of omega-b/n
                   w(3) 0   -w(1) ;
                  -w(2) w(1) 0    ] ;
@@ -215,9 +218,9 @@ end
 function theta = DCM2EA313(C) 
     Cm = reshape(C,[3,3])' ;
 
-    theta(2) = acosd(Cm(3,3)) ;
-    theta(1) = asind(Cm(3,1)/sind(theta(2))) ;
-    theta(3) = asind(Cm(1,3)/sind(theta(2))) ;
+    theta(2) = real(acos(Cm(3,3))) ;
+    theta(1) = real(asin(Cm(3,1)/sin(theta(2)))) ;
+    theta(3) = real(asin(Cm(1,3)/sin(theta(2)))) ;
 end 
 
 function beta = DCM2quat(C) 
@@ -241,7 +244,8 @@ function dx = DCMkinematics(t, C)
     Cm = reshape(C,[3,3])' ;
    
     Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)] ; % omega-b/n vector
+    Omega = Omega*pi/180 ;
+    w = [Omega*sin(0.01*t) 0.01 Omega*cos(0.02*t)]' ; % omega-b/n vector
     wSkew = [ 0   -w(3) w(2) ;  %skew of omega-b/n
               w(3) 0   -w(1) ;
              -w(2) w(1) 0    ] ;
@@ -259,9 +263,10 @@ function dx = EAkinematics(t, ang)
     theta3 = ang(3) ;
 
     Omega = 20 ; % degree per second
-    w = [Omega*sind(0.01*t) 0.01 Omega*cosd(0.02*t)]' ; % omega-b/n vector
+    Omega = Omega*pi/180 ;
+    w = [Omega*sin(0.01*t) 0.01 Omega*cos(0.02*t)]' ; % omega-b/n vector
     
-    B = 1/sind(theta2) * [sind(theta3) cosd(theta3) 0 ; sind(theta2)*cosd(theta3) -sind(theta2)*sind(theta3) 0 ; -cosd(theta2)*sind(theta3) -cosd(theta2)*cosd(theta3) sind(theta2) ] ;
+    B = 1/sin(theta2) * [sin(theta3) cos(theta3) 0 ; sin(theta2)*cosd(theta3) -sin(theta2)*sind(theta3) 0 ; -cos(theta2)*sind(theta3) -cos(theta2)*cos(theta3) sin(theta2) ] ;
     thetaDot = B * w ;
 
     dx = thetaDot ;
