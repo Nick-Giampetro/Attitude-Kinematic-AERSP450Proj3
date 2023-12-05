@@ -11,7 +11,7 @@ dt = 0.01 ; % delta T = 0.01
 init = reshape(Cbn0',[1,9]) ;
 t = 0:dt:totalT ;
 options = odeset('reltol',1e-12,'abstol',1e-12) ;
-[t, Cbn] = ode45( @(t,C) DCMkinematics(t,C) , t , init) ;
+[t, Cbn] = ode45( @(t,C) DCMkinematics(t,C) , t , init, options) ;
 
 orthCheck = zeros(1,length(Cbn)) ;
 for i=1:length(Cbn) 
@@ -53,8 +53,18 @@ hold off
 
 %% Part D
 theta1 = zeros(length(Cbn),3) ;
-for i = 1:length(Cbn)
+theta1(1,:) = [pi/2,0,-pi/2] ;          % known inital angles
+nh = zeros(1,length(Cbn)) ;
+n = 0 ;
+for i = 2:length(Cbn)
     theta1(i,:) = DCM2EA313(Cbn(i,:)) ;
+    if abs(theta1(i,1) - theta1(i-1,1)) > 1
+        n = n + 1 ;
+    end
+    nh(i) = n ;
+end
+for i = 2:length(Cbn)
+    theta1(i,1) = theta1(i,1) + 2*pi*nh(i) ;
 end
 
 f = figure ;
@@ -217,10 +227,10 @@ end
 
 function theta = DCM2EA313(C) 
     Cm = reshape(C,[3,3])' ;
-
-    theta(2) = real(acos(Cm(3,3))) ;
-    theta(1) = real(asin(Cm(3,1)/sin(theta(2)))) ;
-    theta(3) = real(asin(Cm(1,3)/sin(theta(2)))) ;
+    
+    theta(1) = atan2(Cm(3,1),-Cm(3,2)) ;
+    theta(2) = acos(Cm(3,3)) ;
+    theta(3) = atan2(Cm(1,3),Cm(2,3)) ;
 end 
 
 function beta = DCM2quat(C) 
@@ -266,8 +276,20 @@ function dx = EAkinematics(t, ang)
     Omega = Omega*pi/180 ;
     w = [Omega*sin(0.01*t) 0.01 Omega*cos(0.02*t)]' ; % omega-b/n vector
     
-    B = 1/sin(theta2) * [sin(theta3) cos(theta3) 0 ; sin(theta2)*cosd(theta3) -sin(theta2)*sind(theta3) 0 ; -cos(theta2)*sind(theta3) -cos(theta2)*cos(theta3) sin(theta2) ] ;
+
+
+
     thetaDot = B * w ;
 
     dx = thetaDot ;
+end
+
+% creates a dcm for an angle about axis 1
+function r = dcm1axis(ang)
+r = [1 0 0 ; 0 cos(ang) sin(ang) ; 0 -sin(ang) cos(ang)];
+end
+
+% creates a dcm for an angle about axis 3
+function r = dcm3axis(ang)
+r = [cos(ang) sin(ang) 0 ; -sin(ang) cos(ang) 0 ; 0 0 1];
 end
