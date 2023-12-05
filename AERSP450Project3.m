@@ -276,7 +276,7 @@ function dx = EAkinematics(t, ang)
     Omega = Omega*pi/180 ;
     w = [Omega*sin(0.01*t) 0.01 Omega*cos(0.02*t)]' ; % omega-b/n vector
     
-    B = 1/sin(theta2) * [sin(theta3) cos(theta3) 0 ; sin(theta2)*cosd(theta3) -sin(theta2)*sind(theta3) 0 ; -cos(theta2)*sind(theta3) -cos(theta2)*cos(theta3) sin(theta2) ] ;
+    B = 1/sin(theta2) * [sin(theta3) cos(theta3) 0 ; sin(theta2)*cos(theta3) -sin(theta2)*sin(theta3) 0 ; -cos(theta2)*sin(theta3) -cos(theta2)*cos(theta3) sin(theta2) ] ;
     
     thetaDot = B * w ;
 
