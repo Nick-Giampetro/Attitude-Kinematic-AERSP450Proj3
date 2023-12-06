@@ -150,40 +150,40 @@ end
 
 f = figure ;
 subplot(2,2,1)
-plot(t,beta1(:,1),'b')
+plot(t,beta1(:,1),'r')
 hold on
 subplot(2,2,2)
-plot(t,beta1(:,2),'b')
+plot(t,beta1(:,2),'r')
 hold on
 subplot(2,2,3)
-plot(t,beta1(:,3),'b')
+plot(t,beta1(:,3),'r')
 hold on
 subplot(2,2,4)
-plot(t,beta1(:,4),'b')
+plot(t,beta1(:,4),'r')
 hold on
 subplot(2,2,1)
-plot(t,beta2(:,1),'r')
+plot(t,beta2(:,1),'b')
 title('Beta 0 vs Time')
 xlabel('Time (sec)')
 ylabel('Quaternion 0')
 legend('DCM2quat','Descretized')
 hold off
 subplot(2,2,2)
-plot(t,beta2(:,2),'r')
+plot(t,beta2(:,2),'b')
 title('Beta 1 vs Time')
 xlabel('Time (sec)')
 ylabel('Quaternion 1')
 legend('DCM2quat','Descretized')
 hold off
 subplot(2,2,3)
-plot(t,beta2(:,3),'r')
+plot(t,beta2(:,3),'b')
 title('Beta 2 vs Time')
 xlabel('Time (sec)')
 ylabel('Quaternion 2')
 legend('DCM2quat','Descretized')
 hold off
 subplot(2,2,4)
-plot(t,beta2(:,4),'r')
+plot(t,beta2(:,4),'b')
 title('Beta 3 vs Time')
 xlabel('Time (sec)')
 ylabel('Quaternion 3')
