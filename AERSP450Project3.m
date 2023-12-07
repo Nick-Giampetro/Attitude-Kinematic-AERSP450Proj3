@@ -107,15 +107,15 @@ hold off
 
 %% Part F
 beta1 = zeros(length(Cbn),4) ;
-quatConst = zeros(length(Cbn),1) ;
+quatCstr = zeros(length(Cbn),1) ;
 for i = 1:length(Cbn)
-    beta1(i,:) = DCM2quat(Cbn(i,:)) ;
-    quatConst(i) = beta1(i,1)^2 + beta1(i,2)^2 + beta1(i,3)^2 + beta1(i,4)^2 ;
+    beta1(i,:) = DCM2quat(Cbn(i,:)) ;  
+    quatCstr(i) = beta1(i,1)^2 + beta1(i,2)^2 + beta1(i,3)^2 + beta1(i,4)^2 ;
 end
 
 f = figure ;
 subplot (1,1,1)
-plot(t,quatConst)
+plot(t,quatCstr)
 title('Quaternion Constraint vs Time')
 xlabel('Time (sec)')
 ylabel('Quaternion Constraint')
@@ -138,9 +138,10 @@ for i = 2:length(t)
     phi = expm(BwSkew*dt/2) ;
 
     beta2(i,:) = phi * beta2(i-1,:)' ;
-
+    
     beta2inv = [beta2(i,1) -beta2(i,2) -beta2(i,3) -beta2(i,4)] ;
     quatErr(i) = norm(qMult(beta1(i,:),beta2inv) - [1 0 0 0]') ;
+    
 
     if quatErr(i) > 1                             % jank way of making the DCM results from Part F continuous
         beta1(i,:) = beta1(i,:) * -1 ;
