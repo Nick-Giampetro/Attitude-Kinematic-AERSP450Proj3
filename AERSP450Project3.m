@@ -13,18 +13,58 @@ t = 0:dt:totalT ;
 options = odeset('reltol',1e-12,'abstol',1e-12) ;
 [t, Cbn] = ode45( @(t,C) DCMkinematics(t,C) , t , init, options) ;
 
-orthCheck = zeros(1,length(Cbn)) ;
+orthCheck = zeros(length(Cbn),9) ;
 for i=1:length(Cbn) 
     Cm = reshape(Cbn(i,:),[3,3])' ;
-    orthCheck(i) = norm(Cm*Cm' - I) ;
+    orthCheck(i,:) = abs(reshape((Cm*Cm' - I)',[1,9])) ;
 end
 
 f = figure ;
-subplot(1,1,1)
-plot(t,orthCheck)
-title('Norm of Orthogonality Constraint Violation vs Time')
+subplot(3,3,1)
+plot(t,orthCheck(:,1))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
 xlabel('Time (sec)')
-ylabel('Norm of Orthogonality Constraint Violation')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,2)
+plot(t,orthCheck(:,2))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,3)
+plot(t,orthCheck(:,3))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,4)
+plot(t,orthCheck(:,4))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,5)
+plot(t,orthCheck(:,5))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,6)
+plot(t,orthCheck(:,6))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,7)
+plot(t,orthCheck(:,7))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,8)
+plot(t,orthCheck(:,8))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
+subplot(3,3,9)
+plot(t,orthCheck(:,9))
+title('Absolute Value of Orthogonality Constraint Violation vs Time')
+xlabel('Time (sec)')
+ylabel('Orthogonality Constraint Violation')
 
 %% Part B
 [CbnDiscrete1,err1] = discreteDCM(t,Cbn0,dt,Cbn) ;
