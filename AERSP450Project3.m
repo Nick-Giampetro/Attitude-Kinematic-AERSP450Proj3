@@ -121,7 +121,7 @@ hold on
 %% Part E
 init = [pi/2,10^-10,-pi/2] ;
 tEA = 0:dt:totalT ;
-[tEA, theta2] = ode45( @(tEA, theta2) EAkinematics(tEA, theta2) , tEA , init, options) ;    % this method does not work because the inital condition is bascially at gimble lock since theta2 = 0
+[tEA, theta2] = ode45( @(tEA, theta2) EAkinematics(tEA, theta2) , tEA , init, options) ;   
 
 subplot(3,1,1)
 plot(tEA,theta2(:,1),'b')
